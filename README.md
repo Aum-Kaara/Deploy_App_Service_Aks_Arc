@@ -126,3 +126,7 @@ az appservice kube create --resource-group $arcResourceGroupName --name $kubeEnv
 
 ![image](https://user-images.githubusercontent.com/6815990/155552045-27ebc32d-c6e1-4329-a833-cbdebb6696fc.png)
 
+### Create an App Service resource
+
+![image](https://user-images.githubusercontent.com/6815990/155552813-8b1777d0-de84-4378-8535-32b143435aac.png)
+
