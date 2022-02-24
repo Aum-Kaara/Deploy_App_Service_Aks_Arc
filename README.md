@@ -94,7 +94,7 @@ extensionId=$(az k8s-extension show --cluster-type connectedClusters --cluster-n
 
 
 
-Create a Custom Location
+### Create a Custom Location
 
 ```
 extensionId=$(az k8s-extension show --cluster-type connectedClusters --cluster-name $arcClusterName --resource-group $arcResourceGroupName --name $extensionName --query id --output tsv)
@@ -114,7 +114,15 @@ customLocationId=$(az customlocation show --resource-group $arcResourceGroupName
 # Let's double check that the variable was appropriately assigned and isn't empty.
 echo $customLocationId
 ```
+![image](https://user-images.githubusercontent.com/6815990/155551472-a77c63fb-1de5-4c65-8dab-441acd8dcfd4.png)
 
 ### Create the App Service Kubernetes environment
 
 we now need to create an App Service Kubernetes Environment to map the Custom Location and The Static IP that we setup earlier
+
+```
+az appservice kube create --resource-group $arcResourceGroupName --name $kubeEnvironmentName --custom-location $customLocationId --static-ip $staticIp
+```
+
+![image](https://user-images.githubusercontent.com/6815990/155552045-27ebc32d-c6e1-4329-a833-cbdebb6696fc.png)
+
