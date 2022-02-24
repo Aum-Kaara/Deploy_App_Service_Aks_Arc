@@ -46,3 +46,30 @@ az connectedk8s connect --name $arcClusterName --resource-group $arcResourceGrou
 
 
 # Creating a Log Analytics Workspace
+
+```
+appsvcWorkspaceName="$arcClusterName-appsvc-logs"
+
+az monitor log-analytics workspace create --resource-group $arcResourceGroupName --workspace-name $appsvcWorkspaceName
+
+logAnalyticsWorkspaceId=$(az monitor log-analytics workspace show --resource-group $arcResourceGroupName --workspace-name $appsvcWorkspaceName --query customerId --output tsv)
+logAnalyticsWorkspaceIdEnc=$(printf %s $logAnalyticsWorkspaceId | base64) # Needed for the next step
+logAnalyticsKey=$(az monitor log-analytics workspace get-shared-keys --resource-group $arcResourceGroupName --workspace-name $appsvcWorkspaceName --query primarySharedKey --output tsv)
+logAnalyticsKeyEncWithSpace=$(printf %s $logAnalyticsKey | base64)
+logAnalyticsKeyEnc=$(echo -n "${logAnalyticsKeyEncWithSpace//[[:space:]]/}") # Needed for the next step
+
+```
+### Configuration
+
+```
+aksResourceGroupName="rb-aks-rg"
+aksClusterName="rb-aks"
+appsvcPipName="$aksClusterName-appsvc-pip"
+
+# The below is not needed if you are not using AKS. You will need to populate this in another way, it is effectively being used to obtain a static IP to be used by the App Service on Kubernetes deployment.
+aksComponentsResourceGroupName=$(az aks show --resource-group $aksResourceGroupName --name $aksClusterName --output tsv --query nodeResourceGroup)
+
+# Create a Public IP address to be used as the Public Static IP for our App Service Kubernetes environment. We'll assign that to a variable called staticIp.
+az network public-ip create --resource-group $aksComponentsResourceGroupName --name $appsvcPipName --sku STANDARD
+
+```
