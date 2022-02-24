@@ -74,6 +74,25 @@ az network public-ip create --resource-group $aksComponentsResourceGroupName --n
 
 ```
 
+### Install the App Service Extension to your Azure Arc enabled Kubernetes cluster
+
+```
+extensionName="$arcClusterName-appsvc" # Name of the App Service extension
+namespace="appservice" # Namespace in your cluster to install the extension and provision resources
+kubeEnvironmentName="$arcClusterName-appsvc" # Name of the App Service Kubernetes environment resource
+
+
+# Explain that this step configures the extension for Azure Arc.
+az k8s-extension create --resource-group $arcResourceGroupName --name $extensionName --cluster-type connectedClusters --cluster-name $arcClusterName --extension-type 'Microsoft.Web.Appservice' --release-train stable --auto-upgrade-minor-version true --scope cluster --release-namespace $namespace --configuration-settings "Microsoft.CustomLocation.ServiceAccount=default" --configuration-settings "appsNamespace=${namespace}" --configuration-settings "clusterName=${kubeEnvironmentName}" --configuration-settings "loadBalancerIp=${staticIp}"     --configuration-settings "keda.enabled=true" --configuration-settings "buildService.storageClassName=default" --configuration-settings "buildService.storageAccessMode=ReadWriteOnce" --configuration-settings "customConfigMap=${namespace}/kube-environment-config" --configuration-settings "envoy.annotations.service.beta.kubernetes.io/azure-load-balancer-resource-group=${aksResourceGroupName}" --configuration-settings "logProcessor.appLogs.destination=log-analytics" --configuration-protected-settings "logProcessor.appLogs.logAnalyticsConfig.customerId=${logAnalyticsWorkspaceIdEnc}" --configuration-protected-settings "logProcessor.appLogs.logAnalyticsConfig.sharedKey=${logAnalyticsKeyEnc}"
+
+extensionId=$(az k8s-extension show --cluster-type connectedClusters --cluster-name $arcClusterName --resource-group $arcResourceGroupName --name $extensionName --query id --output tsv)
+
+
+```
+
+![image](https://user-images.githubusercontent.com/6815990/155550583-e3bace8e-b285-4197-ac18-fcc6a74f6629.png)
+
+
 
 Create a Custom Location
 
@@ -95,3 +114,7 @@ customLocationId=$(az customlocation show --resource-group $arcResourceGroupName
 # Let's double check that the variable was appropriately assigned and isn't empty.
 echo $customLocationId
 ```
+
+### Create the App Service Kubernetes environment
+
+we now need to create an App Service Kubernetes Environment to map the Custom Location and The Static IP that we setup earlier
