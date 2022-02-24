@@ -73,3 +73,25 @@ aksComponentsResourceGroupName=$(az aks show --resource-group $aksResourceGroupN
 az network public-ip create --resource-group $aksComponentsResourceGroupName --name $appsvcPipName --sku STANDARD
 
 ```
+
+
+Create a Custom Location
+
+```
+extensionId=$(az k8s-extension show --cluster-type connectedClusters --cluster-name $arcClusterName --resource-group $arcResourceGroupName --name $extensionName --query id --output tsv)
+
+customLocationName="$arcClusterName-appsvc" # Name of the custom location
+
+# Obtain the Azure Arc enabled Kubernetes Cluster Resource ID. We'll need this for later Azure CLI commands.
+connectedClusterId=$(az connectedk8s show --resource-group $arcResourceGroupName --name $arcClusterName --query id --output tsv)
+
+# Now create a custom location based upon the information we've been gathering over the course of this post
+az customlocation create --resource-group $arcResourceGroupName --name $customLocationName --host-resource-id $connectedClusterId --namespace $namespace --cluster-extension-ids $extensionId
+
+# The above resource should be created quite quickly. We'll need the Custom Location Resource ID for a later step, so let's go 
+# ahead and assign it to a variable.
+customLocationId=$(az customlocation show --resource-group $arcResourceGroupName --name $customLocationName --query id --output tsv)
+
+# Let's double check that the variable was appropriately assigned and isn't empty.
+echo $customLocationId
+```
